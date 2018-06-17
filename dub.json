@@ -1,0 +1,11 @@
+{
+	"name": "emerald",
+	"description": "Command-line tool for template files useful for generating code files, configurations etc.",
+	"authors": ["Jacob Jensen"],
+	"copyright": "Copyright © 2018 Diamond MVC",
+	"license": "The MIT License (MIT)",
+	"sourcePaths": [
+		"source"
+	],
+	"targetType": "executable"
+}

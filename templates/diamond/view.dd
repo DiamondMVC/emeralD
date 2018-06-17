@@ -1,0 +1,14 @@
+@[
+	route:
+		$1
+---
+	controller:
+		$2Controller
+---
+	placeholders:
+	[
+		"title": "$1"
+	]
+]
+
+<p>Hello Diamond!</p>

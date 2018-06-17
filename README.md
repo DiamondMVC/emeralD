@@ -175,3 +175,19 @@ Example cmd:
 ```
 diamond mvc.emd home Home
 ```
+
+## Building emeralD
+
+You can build emeralD using any D compiler:
+
+https://dlang.org/download.html
+
+It's recommended to build using DUB:
+
+https://code.dlang.org/download
+
+Simply invoke the following command:
+
+```
+dub build
+```
