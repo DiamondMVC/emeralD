@@ -1,0 +1,7 @@
+{
+	"sourcePaths": [
+		"source"
+	],
+	"name": "dubproject",
+	"targetType": "executable"
+}

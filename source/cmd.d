@@ -6,11 +6,13 @@
 module cmd;
 
 import std.conv : to;
-import std.array : replace, array, split;
-import std.algorithm : map, endsWith, startsWith;
+import std.array : replace, array, split, join;
+import std.algorithm : map, endsWith, startsWith, filter;
 import std.stdio : File;
-import std.file : write, append;
+import std.file : write, append, read, isFile, mkdirRecurse, dirEntries, SpanMode, exists;
 import std.string : indexOf;
+import std.path : dirName;
+import std.process : executeShell;
 
 import meta : thisExeDir;
 
@@ -26,14 +28,87 @@ void executeCommands(string[] args)
     return;
   }
 
-  if (args[0] == "--remote")
+  if (args[0] == "--shell" || args[0] == "-sh")
+  {
+    if (args.length > 1)
+    {
+      executeShell(args[1 .. $].join(" "));
+    }
+
+    return;
+  }
+
+  if (args[0] == "--remote" || args[0] == "-rm")
   {
     if (args.length == 4)
     {
       import templates;
 
-      addRemoteTemplate(args[1], args[2], args[3]);
-      loadRemoteTemplates();
+      if (args[1] == "--scaffold" || args[1] == "-sc")
+      {
+        addRemoteScaffold(args[2], args[3]);
+      }
+      else
+      {
+        addRemoteTemplate(args[1], args[2], args[3]);
+        loadRemoteTemplates();
+      }
+    }
+
+    return;
+  }
+
+  if (args[0] == "--scaffold" || args[0] == "-sc")
+  {
+    if ((args.length == 2 || args.length == 3 || args.length == 4) && args[1] && args[1].length)
+    {
+      bool excludeScaffoldName;
+
+      foreach (arg; args.dup)
+      {
+        if (arg && arg.length && (arg == "--exclude" || arg == "-ex"))
+        {
+          excludeScaffoldName = true;
+          args = args.filter!(a => a != "--exclude" && a != "-ex").array;
+          break;
+        }
+      }
+
+      auto scaffoldTemplate = args[1];
+      auto scaffoldPath = (args.length == 3 ? (args[2] ~ "/") : null);
+
+      if (scaffoldTemplate && scaffoldTemplate.length)
+      {
+        foreach (string item; dirEntries(thisExeDir ~ "/scaffold/" ~ scaffoldTemplate, SpanMode.depth))
+        {
+          auto itemDir = dirName(item);
+          string dirReplace = (thisExeDir ~ "/scaffold/").replace("\\", "/");
+
+          string dest = (item.replace("\\", "/")).replace(dirReplace, "");
+
+          if (scaffoldPath && scaffoldPath.length)
+          {
+            dest = scaffoldPath ~ "/" ~ dest;
+          }
+
+          if (excludeScaffoldName)
+          {
+            dest = dest.replace(scaffoldTemplate ~ "/", "");
+          }
+
+          if (!exists(dest))
+          {
+            mkdirRecurse(dest);
+          }
+
+          if (dest.isFile)
+          {
+            write(dest, read(item));
+          }
+        }
+      }
+
+      return;
     }
 
     return;
@@ -55,7 +130,7 @@ void executeCommands(string[] args)
       continue;
     }
 
-    if (arg.startsWith("--path="))
+    if (arg.startsWith("--path=") || arg.startsWith("-p="))
     {
       auto pathEndIndex = arg.indexOf('=');
 
@@ -64,11 +139,11 @@ void executeCommands(string[] args)
         path = arg[pathEndIndex + 1 .. $];
       }
     }
-    else if (arg == "--append")
+    else if (arg == "--append" || arg == "-a")
     {
       appending = true;
     }
-    else if (arg.startsWith("--file="))
+    else if (arg.startsWith("--file=") || arg.startsWith("-f="))
     {
       auto pathEndIndex = arg.indexOf('=');
 

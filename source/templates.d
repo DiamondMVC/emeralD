@@ -5,12 +5,13 @@
 */
 module templates;
 
-import std.file : dirEntries, SpanMode, isDir, isFile, mkdirRecurse, write, readText, exists, append;
-import std.path : baseName;
+import std.file : dirEntries, SpanMode, isDir, isFile, mkdirRecurse, rmdirRecurse, write, readText, read, exists, append;
+import std.path : baseName, dirName;
 import std.stdio : File;
-import std.string : format;
+import std.string : format, strip;
 import std.array : split, replace;
-import std.algorithm : map;
+import std.algorithm : map, endsWith;
+import std.zip : ZipArchive;
 
 import meta : thisExeDir;
 
@@ -68,9 +69,6 @@ void loadRemoteTemplates()
     {
       import std.net.curl : get, HTTP;
 
-      import std.stdio : writefln;
-      writefln("'%s'", url);
-
       auto templateResult = cast(string)get!HTTP(url);
 
       if (templateResult)
@@ -127,4 +125,55 @@ string readTemplate(string root, string name)
 void addRemoteTemplate(string root, string name, string url)
 {
   append(thisExeDir ~ "/remotetemplates.emd", "%s|%s|%s\r\n".format(root, name, url));
+}
+
+/**
+* Adds a remote scaffolding archive.
+* Params:
+*   name = The name of the scaffolding archive.
+*   url =  The url of the archive. (Must be zip.)
+*/
+void addRemoteScaffold(string name, string url)
+{
+  import std.net.curl : download, HTTP;
+
+  if (!url.endsWith(".zip"))
+  {
+    return;
+  }
+
+  auto rootPath = thisExeDir ~ "/scaffold/" ~ name;
+  auto path = rootPath ~ "/__archive.zip";
+
+  if (!exists(path))
+  {
+    rmdirRecurse(rootPath);
+    rmdirRecurse(rootPath);
+  }
+
+  download!HTTP(url, path);
+
+  auto zip = new ZipArchive(read(path));
+
+
+  foreach (name, am; zip.directory)
+  {
+    zip.expand(am);
+
+    auto filePath = (rootPath ~ "/" ~ name).replace("\\", "/");
+    auto dir = dirName(filePath).replace("\\", "/");
+
+    if (!exists(dir))
+    {
+      mkdirRecurse(dir);
+    }
+
+    auto base = baseName(filePath);
+    auto data = base.split(".");
+
+    if (data.length >= 2 && data[0] && data[0].strip().length)
+    {
+      write(filePath, am.expandedData);
+    }
+  }
 }
