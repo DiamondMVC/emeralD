@@ -1,5 +1,6 @@
 # emeralD
-Command-line tool for template files useful for generating code files, configurations etc.
+
+Command-line tool for generating files from templates, scaffolding, generic shell command-passing etc.
 
 ## Control Commands
 
