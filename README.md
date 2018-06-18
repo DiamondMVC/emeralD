@@ -4,7 +4,7 @@ Command-line tool for generating files from templates, scaffolding, generic shel
 
 ## Control Commands
 
-### --remote [root] [template] [url]
+### --remote [root] [template] [url] || -rm [root] [template] [url]
 
 Adds a template from a remote url.
 	
@@ -22,6 +22,7 @@ diamond
 The name of the template to add.
 
 Example:
+
 ```
 view.dd
 ```
@@ -36,7 +37,33 @@ Example:
 http://website/template.d
 ```
 
-### --path=[path]
+### --remote -scaffold [name] [url] || -rm -sc [name] [url]
+
+Adds a scaffolding template from a remote url.
+
+#### name
+
+The name of the scaffolding template to add.
+
+Example:
+
+```
+somescaffoldingtemplate
+```
+
+#### url
+
+The url of the scaffolding template's archive.
+
+*Note: Must be a zip archive for now.*
+
+Example:
+
+```
+someremoteurl.com/somescaffoldingarchive.zip
+```
+
+### --path=[path] || -p=path
 
 Adds the path in which the template file will be operating on.
 
@@ -46,7 +73,7 @@ Example:
 --path=controllers
 ```
 		
-### --append
+### --append || -a
 
 Appends the content of the given template to the given operating path, iff the path is a file.
 
@@ -55,7 +82,109 @@ Example:
 ```
 --append
 ```
-	
+
+### --file=[filename] || -f=[filename]
+
+Adds an explicit filename, that can include arguments passed.
+
+Example:
+
+```
+--file=$3.txt
+```
+
+### --scaffold [template] || -sc [template]
+
+Scaffolds a scaffolding template into the current directory.
+
+#### template
+
+The name of the scaffolding template.
+
+Example:
+
+```
+dub
+```
+
+Example:
+
+```
+--scaffold dub
+```
+
+### --scaffold [template] [destination] || -sc [template] [destination]
+
+Scaffolds a scaffolding template into the specified destination.
+
+#### template
+
+The name of the scaffolding template.
+
+Example:
+
+```
+dub
+```
+
+#### destination
+
+The destination path.
+
+Example:
+
+```
+myproject
+```
+
+Example:
+
+```
+--scaffold dub myproject
+```
+
+### --scaffold [template] [destination] --exclude || -sc [template] [destination] -ex
+
+Scaffolds a scaffolding template into the specified destination and excludes the template name.
+
+
+#### template
+
+The name of the scaffolding template.
+
+Example:
+
+```
+dub
+```
+
+#### destination
+
+The destination path.
+
+Example:
+
+```
+myproject
+```
+
+Example:
+
+```
+--scaffold dub myproject --exclude
+```
+
+### --shell [args ...] || -sh [args ...]
+
+Passes the arguments on to the command-line.
+
+Example:
+
+```
+--shell cd tools
+--shell dub build
+```
+
 ## Operating Arguments:
 
 ### [root] [template] [name ($1)] [args ($2 - $x) ...]
