@@ -7,7 +7,7 @@ Command-line tool for generating files from templates, scaffolding, generic shel
 ### --remote [root] [template] [url] || -rm [root] [template] [url]
 
 Adds a template from a remote url.
-	
+
 #### root
 
 The name of the root template folder.
@@ -26,7 +26,7 @@ Example:
 ```
 view.dd
 ```
-	
+
 #### url
 
 The url of the remote template.
@@ -72,7 +72,7 @@ Example:
 ```
 --path=controllers
 ```
-		
+
 ### --append || -a
 
 Appends the content of the given template to the given operating path, iff the path is a file.
@@ -174,6 +174,36 @@ Example:
 --scaffold dub myproject --exclude
 ```
 
+### --project=[name] || -prj=[name]
+
+Sets the current working folder to the one specified by the project.
+
+This command can be appended to `--scaffold` and when using operating commands.
+
+Example:
+
+```
+--project=mytest
+
+...
+
+--scaffold dub --project=mytest
+```
+
+### --project [name] [path] || -prj [name] [path]
+
+Adds a new project to emeralD.
+
+Projects are folders that can be invoked without being in the working folder.
+
+This is useful to work across folders without having to manually switch around.
+
+Example:
+
+```
+--project mytest /somefolder/anotherfolder/mytest
+```
+
 ### --shell [args ...] || -sh [args ...]
 
 Passes the arguments on to the command-line.
@@ -198,7 +228,7 @@ Example:
 ```
 diamond
 ```
-			
+
 #### template
 
 The name of the template to use.
@@ -210,19 +240,19 @@ view.dd
 ```
 
 #### name ($1)
-		
+
 The name of the result. The filename will be this appended with template's extension.
-		
+
 Example:
 
 ```
 home
 ```
-		
+
 #### args ($2 - $x) ...
 
 The arguments to pass to the template.
-    
+
 Example:
 
 ```
@@ -246,7 +276,7 @@ Example:
 ```
 diamond
 ```
-			
+
 #### template
 
 The name of the template to use.
@@ -258,19 +288,19 @@ view.dd
 ```
 
 #### name ($1)
-		
+
 The name of the result. The filename will be this appended with template's extension.
-		
+
 Example:
 
 ```
 home
 ```
-		
+
 #### args ($2 - $x) ...
 
 The arguments to pass to the template.
-    
+
 Example:
 
 ```

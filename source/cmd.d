@@ -14,7 +14,8 @@ import std.string : indexOf;
 import std.path : dirName;
 import std.process : executeShell;
 
-import meta : thisExeDir;
+import meta : thisExeDir, workFolder;
+import templates;
 
 /**
 * Executes an array of command-line args.
@@ -32,9 +33,9 @@ void executeCommands(string[] args)
   {
     if (args.length > 1)
     {
-      executeShell(args[1 .. $].join(" "));
+      executeShell(args[1 .. $].join(" "), null, Config.none, size_t.max, workFolder && workFolder.length ? workFolder : null);
     }
-
+    
     return;
   }
 
@@ -42,8 +43,6 @@ void executeCommands(string[] args)
   {
     if (args.length == 4)
     {
-      import templates;
-
       if (args[1] == "--scaffold" || args[1] == "-sc")
       {
         addRemoteScaffold(args[2], args[3]);
@@ -58,9 +57,19 @@ void executeCommands(string[] args)
     return;
   }
 
+  if (args[0] == "--project" || args[0] == "-prj")
+  {
+    if (args.length == 3)
+    {
+      addWorkFolder(args[1], args[2]);
+
+      return;
+    }
+  }
+
   if (args[0] == "--scaffold" || args[0] == "-sc")
   {
-    if ((args.length == 2 || args.length == 3 || args.length == 4) && args[1] && args[1].length)
+    if ((args.length == 2 || args.length == 3 || args.length == 4 || args.length == 5) && args[1] && args[1].length)
     {
       bool excludeScaffoldName;
 
@@ -70,7 +79,22 @@ void executeCommands(string[] args)
         {
           excludeScaffoldName = true;
           args = args.filter!(a => a != "--exclude" && a != "-ex").array;
-          break;
+        }
+        else if (arg.startsWith("--project=") || arg.startsWith("-prj="))
+        {
+          auto nameEndIndex = arg.indexOf('=');
+
+          if (nameEndIndex < (arg.length - 1))
+          {
+            auto projectName = arg[nameEndIndex + 1 .. $];
+
+            if (projectName && projectName.length)
+            {
+              setWorkFolder(projectName);
+            }
+          }
+
+          args = args.filter!(a => !a.startsWith("--project") && !a.startsWith("-prj")).array;
         }
       }
 
@@ -96,12 +120,15 @@ void executeCommands(string[] args)
             dest = dest.replace(scaffoldTemplate ~ "/", "");
           }
 
-          if (!exists(dest))
+          dest = workFolder ~ dest;
+          auto dirDest = dirName(dest);
+
+          if (!exists(dirDest))
           {
-            mkdirRecurse(dest);
+            mkdirRecurse(dirDest);
           }
 
-          if (dest.isFile)
+          if (item.isFile)
           {
             write(dest, read(item));
           }
@@ -137,6 +164,20 @@ void executeCommands(string[] args)
       if (pathEndIndex < (arg.length - 1))
       {
         path = arg[pathEndIndex + 1 .. $];
+      }
+    }
+    else if (arg.startsWith("--project=") || arg.startsWith("-prj="))
+    {
+      auto nameEndIndex = arg.indexOf('=');
+
+      if (nameEndIndex < (arg.length - 1))
+      {
+        auto projectName = arg[nameEndIndex + 1 .. $];
+
+        if (projectName && projectName.length)
+        {
+          setWorkFolder(projectName);
+        }
       }
     }
     else if (arg == "--append" || arg == "-a")
@@ -241,7 +282,7 @@ void executeCommands(string[] args)
 
   if (appending)
   {
-    append(path, templateContent);
+    append(workFolder ~ path, templateContent);
   }
   else
   {
@@ -256,6 +297,6 @@ void executeCommands(string[] args)
       path = fileName;
     }
 
-    write(path, templateContent);
+    write(workFolder ~ path, templateContent);
   }
 }

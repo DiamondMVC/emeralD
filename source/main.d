@@ -21,6 +21,7 @@ void main(string[] args)
   import templates;
   loadTemplates();
   loadRemoteTemplates();
+  loadWorkFolders();
 
   args = args[1 .. $];
 

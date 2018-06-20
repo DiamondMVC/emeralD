@@ -13,7 +13,7 @@ import std.array : split, replace;
 import std.algorithm : map, endsWith;
 import std.zip : ZipArchive;
 
-import meta : thisExeDir;
+import meta : thisExeDir, workFolder;
 
 /// Collection of templates.
 private string[string][string] _templates;
@@ -175,5 +175,69 @@ void addRemoteScaffold(string name, string url)
     {
       write(filePath, am.expandedData);
     }
+  }
+}
+
+/// The work folders.
+private string[string] _workFolders;
+
+/// Loads all work folders.
+void loadWorkFolders()
+{
+  if (_workFolders && _workFolders.length)
+  {
+    _workFolders.clear();
+  }
+
+  auto projects = File(thisExeDir ~ "/projects.emd");
+
+  foreach (line; projects.byLine.map!(l => l.replace("\r", "")))
+  {
+    if (!line || !line.length)
+    {
+      continue;
+    }
+
+    auto data = line.split("|");
+
+    if (!data || data.length != 2)
+    {
+      continue;
+    }
+
+    immutable workFolderName = cast(immutable)data[0];
+    immutable workFolderPath = cast(immutable)data[1];
+
+    _workFolders[workFolderName] = workFolderPath;
+  }
+}
+
+/**
+* Adds a work folder.
+* Params:
+*   name = The name of the work folder to add.
+*   path = The path of the work folder.
+*/
+void addWorkFolder(string name, string path)
+{
+  append(thisExeDir ~ "/projects.emd", "%s|%s\r\n".format(name, path));
+
+  loadWorkFolders();
+
+  setWorkFolder(name);
+}
+
+/**
+* Sets a work folder.
+* Params:
+*   name = The name of the work folder to set.
+*/
+void setWorkFolder(string name)
+{
+  workFolder = _workFolders.get(name, "");
+
+  if (workFolder && workFolder.length && workFolder[$-1] != '/')
+  {
+    workFolder ~= "/";
   }
 }

@@ -5,11 +5,17 @@
 */
 module meta;
 
-/// Gets this executable file's directory.
-string thisExeDir()
+@property
 {
-  import std.path : dirName;
-  import std.file : thisExePath;
+  /// Gets this executable file's directory.
+  string thisExeDir()
+  {
+    import std.path : dirName;
+    import std.file : thisExePath;
 
-  return dirName(thisExePath);
+    return dirName(thisExePath);
+  }
 }
+
+/// The work folder.
+string workFolder = "";
